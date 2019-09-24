@@ -6,6 +6,11 @@ resource "hello-world-git": {
   param revision: "$(context.git-revision)"
 }
 
+resource "hello-world-gitops-git": {
+  type: "git"
+  param url: "https://github.com/gpaul/hello-world-gitops"
+}
+
 resource "hello-world-image": {
   type: "image"
   param url: "docker.io/gpaul/hello-world"
@@ -24,7 +29,7 @@ task "source-to-image": {
         "--destination=\(resource["hello-world-image"].param.url)",
         "--context=/workspace/hello-world-git",
         "--oci-layout-path=/builder/home/image-outputs/hello-world-image",
-        "--dockerfile=/workspace/hello-world/Dockerfile"
+        "--dockerfile=/workspace/hello-world-git/Dockerfile"
       ],
       env: [
         {
@@ -36,9 +41,31 @@ task "source-to-image": {
   ]
 }
 
+task "deploy": {
+  inputs: ["hello-world-image", "hello-world-gitops-git"]
+  steps: [
+    {
+      name: "update-gitops-repo"
+      image: "alpine/git:1.0.7"
+      workingDir: "/workspace/hello-world-gitops-git"
+      command: [
+        "/bin/sh",
+        "-c",
+        """
+        sed -i 's|image:.*|gpaul/hello-world@$(inputs.resources.hello-world-image.digest)|' ./application.yaml && 
+        git config user.name CI &&
+        git config user.email ci@example.com && 
+        git commit -a -m 'update image digest to $(inputs.resources.hello-world-image.digest)' &&
+        git push origin master
+        """
+      ]
+    }
+  ]
+}
+
 actions: [
   {
-    tasks: ["build-image"]
+    tasks: ["build-image", "deploy"]
     on push branches: ["master"]
   }
 ]

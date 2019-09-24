@@ -52,7 +52,7 @@ task "deploy": {
         "/bin/sh",
         "-c",
         """
-        sed -i 's|image:.*|gpaul/hello-world@$(inputs.resources.hello-world-image.digest)|' ./application.yaml && 
+        sed -i 's|image:.*|image: gpaul/hello-world@$(inputs.resources.hello-world-image.digest)|' ./application.yaml &&
         git config user.name CI &&
         git config user.email ci@example.com && 
         git commit -a -m 'update image digest to $(inputs.resources.hello-world-image.digest)' &&

@@ -1,0 +1,44 @@
+_tknVersion: "0.3.1"
+
+resource "hello-world-git": {
+  type: "git"
+  param url: "$(context.git-url)"
+  param revision: "$(context.git-revision)"
+}
+
+resource "hello-world-image": {
+  type: "image"
+  param url: "docker.io/gpaul/hello-world"
+  param digest: "$(inputs.resources.hello-world-image.digest)"
+}
+
+task "source-to-image": {
+  inputs: ["hello-world-git"]
+  outputs: ["hello-world-image"]
+
+  steps: [
+    {
+      name: "build-and-push"
+      image: "chhsiao/kaniko-executor"
+      args: [
+        "--destination=\(resource["hello-world-image"].param.url)",
+        "--context=/workspace/hello-world-git",
+        "--oci-layout-path=/builder/home/image-outputs/hello-world-image",
+        "--dockerfile=/workspace/hello-world/Dockerfile"
+      ],
+      env: [
+        {
+          name: "DOCKER_CONFIG",
+          value: "/builder/home/.docker"
+        }
+      ]
+    }
+  ]
+}
+
+actions: [
+  {
+    tasks: ["build-image"]
+    on push branches: ["master"]
+  }
+]

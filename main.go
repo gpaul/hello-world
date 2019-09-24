@@ -24,6 +24,10 @@ import (
 	"os"
 )
 
+
+var Version string
+var Buildtime string
+
 func main() {
 	// use PORT environment variable, or default to 8080
 	port := "8080"
@@ -44,9 +48,8 @@ func main() {
 // hello responds to the request with a plain-text "Hello, world" message.
 func hello(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Serving request: %s", r.URL.Path)
-	host, _ := os.Hostname()
 	fmt.Fprintf(w, "Hello, world!\n")
-	fmt.Fprintf(w, "Version: 1.0.1\n")
-	fmt.Fprintf(w, "Hostname: %s\n", host)
+	fmt.Fprintf(w, "Version: %s\n", Version)
+	fmt.Fprintf(w, "Build time: %s\n", Buildtime)
 }
 // [END all]

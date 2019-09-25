@@ -51,6 +51,6 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, world!\n")
 	fmt.Fprintf(w, "Version: %s\n", Version)
 	fmt.Fprintf(w, "Build time: %s\n", Buildtime)
-	fmt.Fprintf(w, "Let's try that again ???\n")
+	fmt.Fprintf(w, "Let's try that again!!!\n")
 }
 // [END all]

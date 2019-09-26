@@ -22,13 +22,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
-
 
 var Version string
 var Buildtime string
 
 func main() {
+	go func() {
+		log.Printf("I'm still here..." + time.Now().String())
+	}()
 	// use PORT environment variable, or default to 8080
 	port := "8080"
 	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
@@ -53,4 +56,5 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Build time: %s\n", Buildtime)
 	fmt.Fprintf(w, "Let's try that again ^_^\n")
 }
+
 // [END all]

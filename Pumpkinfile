@@ -74,6 +74,29 @@ task "deploy": {
   ]
 }
 
+task "gofmt": {
+  inputs: ["hello-world-git"]
+
+  steps: [
+    {
+      name: "gofmt"
+      image: "golang:1.13-alpine"
+      workingDir: "/workspace/hello-world-gitops-git"
+      command: [
+        "/bin/sh",
+        "-c",
+        ##"""
+        git config user.name CI &&
+        git config user.email ci@example.com &&
+        go fmt ./... | tee | xargs git add
+        git commit -m 'go fmt'
+        git push
+        """##
+      ]
+    }
+  ]
+}
+
 actions: [
   {
     tasks: ["source-to-image", "deploy"]
@@ -82,5 +105,9 @@ actions: [
   {
     tasks: ["source-to-image"]
     on pull_request branches: ["master"]
+  },
+  {
+    tasks: ["gofmt"]
+    on pull_request chatops: ["gofmt"]
   }
 ]

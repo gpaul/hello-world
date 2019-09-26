@@ -81,7 +81,7 @@ task "gofmt": {
     {
       name: "gofmt"
       image: "golang:1.13-alpine"
-      workingDir: "/workspace/hello-world-gitops-git"
+      workingDir: "/workspace/hello-world-git"
       command: [
         "/bin/sh",
         "-c",

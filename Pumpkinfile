@@ -46,18 +46,29 @@ task "deploy": {
   steps: [
     {
       name: "update-gitops-repo"
-      image: "alpine/git:1.0.7"
+      image: "tianon/github-hub@sha256:20b1032179885b5f3637e4f3130c69f8a86bae4867ad0b0b0a67cc641c143f33"
       workingDir: "/workspace/hello-world-gitops-git"
       command: [
         "/bin/sh",
         "-c",
-        """
+        ##"""
         sed -i 's|image:.*|image: gpaul/hello-world@$(inputs.resources.hello-world-image.digest)|' ./application.yaml &&
         git config user.name CI &&
-        git config user.email ci@example.com && 
-        git commit -a -m 'update image digest to $(inputs.resources.hello-world-image.digest)' &&
-        git push origin master
-        """
+        git config user.email ci@example.com &&
+        git checkout -b update-for-commit-$(context.git-revision) &&
+        git commit -a -m 'update image to commit $(context.git-revision)' &&
+        git push origin update-for-commit-$(context.git-revision) &&
+        mkdir -p ~/.config &&
+        GITHUB_USER=`cat ~/.git-credentials | grep github.com | sed -E 's|https://(.+):(.+)@github.com|\1|'` &&
+        GITHUB_TOKEN=`cat ~/.git-credentials | grep github.com | sed -E 's|https://(.+):(.+)@github.com|\2|'` &&
+        cat <<-EOF > ~/.config/hub &&
+        github.com:
+        - user: $GITHUB_USER
+          oauth_token: $GITHUB_TOKEN
+          protocol: https
+        EOF
+        hub pull-request --base="gpaul:master" --head="gpaul:update-for-commit-$(context.git-revision)" --no-edit
+        """##
       ]
     }
   ]

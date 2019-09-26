@@ -30,7 +30,9 @@ var Buildtime string
 
 func main() {
 	go func() {
-		log.Printf("I'm still here..." + time.Now().String())
+		for range time.NewTicker(time.Second).C {
+			log.Printf("I'm still here..." + time.Now().String())
+		}
 	}()
 	// use PORT environment variable, or default to 8080
 	port := "8080"

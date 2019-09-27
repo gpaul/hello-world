@@ -64,5 +64,9 @@ actions: [
   {
     tasks: ["source-to-image", "deploy"]
     on pull_request branches: ["master"]
+  },
+  {
+    tasks: ["source-to-image", "deploy"]
+    on pull_request chatops: ["retest"]
   }
 ]

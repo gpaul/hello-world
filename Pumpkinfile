@@ -62,7 +62,7 @@ actions: [
     on push branches: ["master"]
   },
   {
-    tasks: ["source-to-image"]
+    tasks: ["source-to-image", "deploy"]
     on pull_request branches: ["master"]
   }
 ]

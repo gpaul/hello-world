@@ -1,35 +1,35 @@
 _tknVersion: "0.3.1"
 
-resource "hello-world-git": {
+resource "src-git": {
   type: "git"
   param url: "$(context.git.url)"
   param revision: "$(context.git.commit)"
 }
 
-resource "hello-world-gitops-git": {
+resource "gitops-git": {
   type: "git"
   param url: "https://github.com/gpaul/hello-world-gitops"
 }
 
-resource "hello-world-image": {
+resource "docker-image": {
   type: "image"
   param url: "docker.io/gpaul/hello-world"
-  param digest: "$(inputs.resources.hello-world-image.digest)"
+  param digest: "$(inputs.resources.docker-image.digest)"
 }
 
 task "source-to-image": {
-  inputs: ["hello-world-git"]
-  outputs: ["hello-world-image"]
+  inputs: ["src-git"]
+  outputs: ["docker-image"]
 
   steps: [
     {
       name: "build-and-push"
       image: "chhsiao/kaniko-executor"
       args: [
-        "--destination=\(resource["hello-world-image"].param.url)",
-        "--context=/workspace/hello-world-git",
-        "--oci-layout-path=/builder/home/image-outputs/hello-world-image",
-        "--dockerfile=/workspace/hello-world-git/Dockerfile"
+        "--destination=\(resource["docker-image"].param.url)",
+        "--context=/workspace/src-git",
+        "--oci-layout-path=/builder/home/image-outputs/docker-image",
+        "--dockerfile=/workspace/src-git/Dockerfile"
       ],
       env: [
         {
@@ -42,15 +42,15 @@ task "source-to-image": {
 }
 
 task "deploy": {
-  inputs: ["hello-world-image", "hello-world-gitops-git"]
+  inputs: ["docker-image", "gitops-git"]
   steps: [
     {
       name: "update-gitops-repo"
       image: "gpaul/update-gitops-repo:latest"
-      workingDir: "/workspace/hello-world-gitops-git"
+      workingDir: "/workspace/gitops-git"
       args: [
         "-git-revision=$(context.git.commit)",
-        "-docker-image-digest=$(inputs.resources.hello-world-image.digest)"
+        "-docker-image-digest=$(inputs.resources.docker-image.digest)"
       ]
     }
   ]

@@ -46,7 +46,7 @@ task "deploy": {
   steps: [
     {
       name: "update-gitops-repo"
-      image: "gpaul/update-gitops-repo:latest"
+      image: "mesosphere/pumpkin-update-gitops-repo:latest"
       workingDir: "/workspace/gitops-git"
       args: [
         "-git-revision=$(context.git.commit)",
